@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Consultas e Alterações</title>
+</head>
+<body>
+    <!-- Menu Superior -->
+    <nav>
+        <ul>
+            <li><a href="/Inicio/Index.html">Home</a></li>
+        </ul>
+    </nav>
+
+    <h1>Consulta SAP</h1>
+    <input type="text" id="sapInput" placeholder="Digite o SAP">
+    <button onclick="fetchUsuarios()">Buscar</button>
+    <button onclick="toggleFormulario('addForm')">Adicionar Novo Usuário</button> <!-- Botão de adicionar fora da tabela -->
+    <table id="usuariosTable">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>SAP</th>
+                <th>Email</th>
+                <th>Ações</th> <!-- Coluna para ações -->
+                <th>Deletar</th> <!-- Coluna para deletar -->
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Os dados serão inseridos aqui -->
+        </tbody>
+    </table>
+
+    <!-- Formulário para edição -->
+    <form id="editForm" style="display:none;">
+        <h2>Editar Usuário</h2>
+        <label for="editNome">Nome:</label>
+        <input type="text" id="editNome" name="nome"><br><br>
+        <label for="editEmail">E-mail:</label>
+        <input type="email" id="editEmail" name="email"><br><br>
+        <button type="button" onclick="salvarAlteracoes()">Salvar Alterações</button>
+    </form>
+
+    <!-- Formulário para adição -->
+    <form id="addForm" style="display:none;">
+        <h2>Adicionar Novo Usuário</h2>
+        <label for="addNome">Nome:</label>
+        <input type="text" id="addNome" name="nome"><br><br>
+        <label for="addSAP">SAP:</label>
+        <input type="text" id="addSAP" name="SAP"><br><br>
+        <label for="addEmail">E-mail:</label>
+        <input type="email" id="addEmail" name="email"><br><br>
+        <button type="button" onclick="adicionarUsuario()">Adicionar Usuário</button>
+    </form>
+
+    <script>
+        async function fetchUsuarios() {
+            const sap = document.getElementById('sapInput').value;
+            const response = await fetch(`http://localhost:3000/usuarios?SAP=${sap}`);
+            const usuarios = await response.json();
+            const tableBody = document.getElementById('usuariosTable').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = '';
+
+            usuarios.forEach(usuario => {
+                const row = tableBody.insertRow();
+                const cellNome = row.insertCell(0);
+                const cellSAP = row.insertCell(1);
+                const cellEmail = row.insertCell(2);
+                const cellAcoes = row.insertCell(3); 
+                const cellDeletar = row.insertCell(4); // Nova célula para deletar
+
+                cellNome.textContent = usuario.nome;
+                cellSAP.textContent = usuario.SAP;
+                cellEmail.textContent = usuario.E_MAIL;
+
+                // Adiciona o botão "Alterar"
+                const alterarButton = document.createElement('button');
+                alterarButton.textContent = 'Alterar';
+                alterarButton.onclick = () => toggleFormulario('editForm', usuario);
+                cellAcoes.appendChild(alterarButton);
+
+                // Adiciona o botão "Deletar"
+                const deletarButton = document.createElement('button');
+                deletarButton.textContent = 'Deletar';
+                deletarButton.onclick = () => deletarUsuario(usuario.SAP);
+                cellDeletar.appendChild(deletarButton);
+            });
+        }
+
+        function toggleFormulario(formId, usuario = null) {
+            const form = document.getElementById(formId);
+            if (form.style.display === 'none' || form.style.display === '') {
+                form.style.display = 'block';
+                if (formId === 'editForm' && usuario) {
+                    document.getElementById('editNome').value = usuario.nome;
+                    document.getElementById('editEmail').value = usuario.E_MAIL;
+                    form.dataset.sap = usuario.SAP;
+                }
+            } else {
+                form.style.display = 'none';
+            }
+        }
+
+        async function salvarAlteracoes() {
+            const nome = document.getElementById('editNome').value;
+            const email = document.getElementById('editEmail').value;
+            const SAP = document.getElementById('editForm').dataset.sap;
+
+            const response = await fetch(`http://localhost:3000/usuarios?SAP=${SAP}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ nome, email })
+            });
+
+            if (response.ok) {
+                alert('Usuário alterado com sucesso!');
+                document.getElementById('editForm').style.display = 'none';
+                fetchUsuarios(); // Atualiza a tabela
+            } else {
+                alert('Erro ao alterar usuário.');
+            }
+        }
+
+        async function adicionarUsuario() {
+            const nome = document.getElementById('addNome').value;
+            const SAP = document.getElementById('addSAP').value;
+            const email = document.getElementById('addEmail').value;
+
+            const response = await fetch('http://localhost:3000/usuarios', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ nome, SAP, email })
+            });
+
+            if (response.ok) {
+                alert('Usuário adicionado com sucesso!');
+                document.getElementById('addForm').reset();
+                document.getElementById('addForm').style.display = 'none';
+                fetchUsuarios(); // Atualiza a tabela
+            } else {
+                alert('Erro ao adicionar usuário.');
+            }
+        }
+
+        async function deletarUsuario(SAP) {
+            const response = await fetch(`http://localhost:3000/usuarios?SAP=${SAP}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                alert('Usuário deletado com sucesso!');
+                fetchUsuarios(); // Atualiza a tabela
+            } else {
+                alert('Erro ao deletar usuário.');
+            }
+        }
+    </script>
+</body>
+</html>

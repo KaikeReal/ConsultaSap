@@ -1,0 +1,59 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+nav {
+    width: 100%;
+    background-color: #333;
+    padding: 1rem 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+}
+
+nav ul li {
+    margin: 0 1rem;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.2rem;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 5rem; /* Ajuste para evitar sobreposição com a navbar */
+}
+
+.button-container button {
+    margin: 0 1rem;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    cursor: pointer;
+    background-color: #007BFF; /* Cor azul */
+    color: white;
+    border: none;
+    border-radius: 25px; /* Bordas arredondadas */
+    transition: background-color 0.3s;
+}
+
+.button-container button:hover {
+    background-color: #0056b3; /* Cor azul mais escura ao passar o mouse */
+}

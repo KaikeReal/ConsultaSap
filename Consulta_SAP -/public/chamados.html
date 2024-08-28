@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Busca de Chamados</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Busca de Chamados</h1>
+    <form id="searchForm">
+        <label for="sap">Digite o SAP do usuário:</label>
+        <input type="text" id="sap" name="sap" required>
+        <button type="submit">Buscar</button>
+    </form>
+    <h2>Resultados:</h2>
+    <table id="resultsTable">
+        <thead>
+            <tr>
+                <th>CHAMADO</th>
+                <th>SAP</th>
+                <th>NOME</th>
+                <th>DESC_ENCERRAMENTO</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const sap = document.getElementById('sap').value;
+            try {
+                const response = await fetch(`http://localhost:3000/chamados?sap=${sap}`);
+                if (!response.ok) {
+                    throw new Error('Erro no servidor');
+                }
+                const chamados = await response.json();
+                const resultsTable = document.getElementById('resultsTable').getElementsByTagName('tbody')[0];
+                resultsTable.innerHTML = '';
+                chamados.forEach(chamado => {
+                    const row = resultsTable.insertRow();
+                    row.insertCell(0).textContent = chamado.CHAMADO;
+                    row.insertCell(1).textContent = chamado.SAP;
+                    row.insertCell(2).textContent = chamado.NOME;
+                    row.insertCell(3).textContent = chamado.DESC_ENCERRAMENTO;
+                });
+            } catch (error) {
+                console.error('Erro:', error);
+            }
+        });
+    </script>
+</body>
+</html>
